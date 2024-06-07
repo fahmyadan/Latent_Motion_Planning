@@ -1,0 +1,21 @@
+defaults:
+  - algorithm: planet
+  - dynamics_model: planet_hw
+  - overrides: planet_highway_env
+  - action_optimizer: mppi
+
+seed: 0
+device: "cuda:0"
+log_frequency_agent: 1000
+save_video: false
+debug_mode: false
+
+experiment: default
+
+root_dir: "./exp"
+hydra:
+  run:
+    dir: ${root_dir}/${algorithm.name}/${experiment}/${overrides.env}/ #${now:%Y.%m.%d}/${now:%H%M%S}
+
+  sweep:
+    dir: ${root_dir}/${algorithm.name}/${experiment}/${overrides.env}/

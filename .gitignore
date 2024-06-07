@@ -1,2 +1,11 @@
 poetry.lock
 .gitmodules
+recons/*
+latent_motion_planning/src/utils/__pycache__/*
+latent_motion_planning/src/models/__pycache__/*
+.gitignore
+exp/*
+latent_motion_planning/src/planners/__pycache__/*
+latent_motion_planning/src/algorithm/__pycache__/*
+latent_motion_planning/__pycache__/*
+.vscode/launch.json

@@ -1,0 +1,110 @@
+# @package _group_
+env: "intersection-v0"
+evaluate_trained: false
+logging:
+  wandb: false
+  project_name: 'Planet'
+  tensorboard_log: 'logs'
+  model_path: '/home/tsl/Desktop/models/planet/run-20240501_141635-fs2sufpj (short_horizon)/model.pth'
+  eval_episodes: 100
+
+n_epochs: 1
+
+
+env_args:
+  _target_: mbrl.planning.TrajectoryOptimizerAgent
+  offroad_terminal: true
+  duration: 20
+  destination: 'o1'
+  initial_vehicle_count: 5
+  spawn_probability: 0.5
+  collision_reward: -10
+  on_road_reward: 0.1 
+  high_speed_reward: 0.5
+  path_reward: 0
+  arrived_reward: 20
+  simulation_frequency: 10
+  policy_frequency: 5
+  exit_distance: 70
+  render_mode: human
+  # ego_lane: [
+  #           ["o2", "ir2", 0],
+  #           ["o1", "ir1", 0]
+  #         ]
+  observation:
+    type: TupleObservation
+    observation_configs:
+      - type: RGBObservation
+        observation_shape: [128, 128]
+        stack_size: 3
+        weights: [1.0, 1.0, 1.0] #[0.2989, 0.5870, 0.1140] 
+        scaling: 1.75
+
+      - type: Kinematics
+        features:
+          - presence
+          - x
+          - y
+          - heading
+          - vx
+          - vy
+          - lane_id
+        absolute: false
+        features_range: 
+            x: [0, 0]
+            y: [0, 0]
+            vx: [-20, 20]
+            vy: [-20, 20]
+        
+  action: 
+    type: ContinuousAction
+
+term_fn: "no_termination"
+
+# General configuration overrides
+trial_length: 100
+action_noise_std: 0.3
+
+# Model overrides
+num_grad_updates: 10
+optim_lr: 0.0001
+sequence_length: 10
+batch_size: 256
+free_nats: 3
+kl_scale: 1.0
+
+# Planner configuration overrides
+planning_horizon: 7
+mppi_num_iters: 5
+mppi_population_size: 1000
+mppi_gamma: 0.9
+mppi_sigma: 1.0
+mppi_beta: 0.9
+# planning_horizon: 12
+# cem_num_iters: 10
+# cem_elite_ratio: 0.1
+# cem_population_size: 1000
+# cem_alpha: 0.0
+# cem_clipped_normal: true
+
+mppi:
+  nx : 4
+  noise_sigma: [[5, 0],[0,1.5]]
+  noise_mu : [0, 0]
+  u_min: [-40, -1.0]
+  u_max: [40, 1.0]
+  horizon: 10
+  num_samples : 2000
+  lambda_: 200
+
+
+kpis: 
+  travel_time: true
+  collisions: true
+  arrived: true
+  delay: true 
+  reward: true
+  off_road: true 
+
+
+
