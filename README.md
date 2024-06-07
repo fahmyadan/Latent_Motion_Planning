@@ -23,6 +23,7 @@ It will still run without CUDA but a large ensemble size will have larger memory
 We have included a simple installation script:
 
 ```
+git clone --recurse-submodules https://github.com/fahmyadan/Latent_Motion_Planning.git 
 sudo chmod +x setup.bash 
 ./setup.bash
 conda activate mbrl
