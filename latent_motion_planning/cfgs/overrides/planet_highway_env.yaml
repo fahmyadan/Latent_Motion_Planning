@@ -26,11 +26,7 @@ env_args:
   simulation_frequency: 10
   policy_frequency: 5
   exit_distance: 70
-  render_mode: human
-  # ego_lane: [
-  #           ["o2", "ir2", 0],
-  #           ["o1", "ir1", 0]
-  #         ]
+  render_mode: human #or rgb_array for wandb logging 
   observation:
     type: TupleObservation
     observation_configs:
@@ -62,7 +58,7 @@ env_args:
 term_fn: "no_termination"
 
 # General configuration overrides
-trial_length: 100
+trial_length: 100 #maximum number of steps
 action_noise_std: 0.3
 
 # Model overrides
@@ -73,20 +69,15 @@ batch_size: 256
 free_nats: 3
 kl_scale: 1.0
 
-# Planner configuration overrides
+# Planner configuration overrides (for latent planning)
 planning_horizon: 7
 mppi_num_iters: 5
 mppi_population_size: 1000
 mppi_gamma: 0.9
 mppi_sigma: 1.0
 mppi_beta: 0.9
-# planning_horizon: 12
-# cem_num_iters: 10
-# cem_elite_ratio: 0.1
-# cem_population_size: 1000
-# cem_alpha: 0.0
-# cem_clipped_normal: true
 
+#For demos
 mppi:
   nx : 4
   noise_sigma: [[5, 0],[0,1.5]]
@@ -97,7 +88,7 @@ mppi:
   num_samples : 2000
   lambda_: 200
 
-
+#Metrics
 kpis: 
   travel_time: true
   collisions: true
