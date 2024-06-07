@@ -7,9 +7,9 @@ import omegaconf
 import torch
 import torch.distributions
 
-import mbrl.models
-import mbrl.types
-import mbrl.util.math
+from latent_motion_planning.src.models import *
+import latent_motion_planning.src.models as models
+import latent_motion_planning.src.utils.math as math
 
 from .core import Agent, complete_agent_cfg
 
@@ -114,7 +114,7 @@ class MPPIOptimizer(Optimizer):
                 ),
                 device=self.device,
             )
-            noise = mbrl.util.math.truncated_normal_(noise)
+            noise = math.truncated_normal_(noise)
 
             lb_dist = self.mean - self.lower_bound
             ub_dist = self.upper_bound - self.mean
@@ -293,13 +293,13 @@ class TrajectoryOptimizerAgent(Agent):
             "action_lb": np.array(action_lb),
             "action_ub": np.array(action_ub),
         }
-        self.trajectory_eval_fn: mbrl.types.TrajectoryEvalFnType = None
+        self.trajectory_eval_fn = None
         self.actions_to_use: List[np.ndarray] = []
         self.replan_freq = replan_freq
         self.verbose = verbose
 
     def set_trajectory_eval_fn(
-        self, trajectory_eval_fn: mbrl.types.TrajectoryEvalFnType
+        self, trajectory_eval_fn
     ):
         """Sets the trajectory evaluation function.
 
@@ -387,7 +387,7 @@ class TrajectoryOptimizerAgent(Agent):
 
 
 def create_trajectory_optim_agent_for_model(
-    model_env: mbrl.models.ModelEnv,
+    model_env,
     agent_cfg: omegaconf.DictConfig,
     num_particles: int = 1,
 ) -> TrajectoryOptimizerAgent:

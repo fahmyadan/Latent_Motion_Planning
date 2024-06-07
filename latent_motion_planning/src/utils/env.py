@@ -10,84 +10,108 @@ import torch
 from latent_motion_planning.envs.HighwayEnv.highway_env.envs.intersection_env import IntersectionEnv
 
 
-def _get_term_and_reward_fn(
-    cfg: Union[omegaconf.ListConfig, omegaconf.DictConfig],
-) -> Tuple[mbrl.types.TermFnType, Optional[mbrl.types.RewardFnType]]:
-    import mbrl.env
+# def _get_term_and_reward_fn(
+#     cfg: Union[omegaconf.ListConfig, omegaconf.DictConfig],
+# ) -> Tuple[mbrl.types.TermFnType, Optional[mbrl.types.RewardFnType]]:
+#     import mbrl.env
 
-    term_fn = getattr(mbrl.env.termination_fns, cfg.overrides.term_fn)
-    if hasattr(cfg.overrides, "reward_fn") and cfg.overrides.reward_fn is not None:
-        reward_fn = getattr(mbrl.env.reward_fns, cfg.overrides.reward_fn)
-    else:
-        reward_fn = getattr(mbrl.env.reward_fns, cfg.overrides.term_fn, None)
+#     term_fn = getattr(mbrl.env.termination_fns, cfg.overrides.term_fn)
+#     if hasattr(cfg.overrides, "reward_fn") and cfg.overrides.reward_fn is not None:
+#         reward_fn = getattr(mbrl.env.reward_fns, cfg.overrides.reward_fn)
+#     else:
+#         reward_fn = getattr(mbrl.env.reward_fns, cfg.overrides.term_fn, None)
 
-    return term_fn, reward_fn
+#     return term_fn, reward_fn
 
 def _legacy_make_env(
     cfg: Union[omegaconf.ListConfig, omegaconf.DictConfig],
-) -> Tuple[gym.Env, mbrl.types.TermFnType, Optional[mbrl.types.RewardFnType]]:
-    if "dmcontrol___" in cfg.overrides.env:
-        import mbrl.third_party.dmc2gym as dmc2gym
-
-        domain, task = cfg.overrides.env.split("___")[1].split("--")
-        term_fn, reward_fn = _get_term_and_reward_fn(cfg)
-        env = dmc2gym.make(domain_name=domain, task_name=task)
-        env = gym.make("GymV26Environment-v0", env=env)
-    elif "pybulletgym__" in cfg.overrides.env:
-        import gym as g
-        import pybulletgym  # noqa: F401
-
-        env = g.make(cfg.overrides.env.split("___")[1], apply_api_compatibility=True)
-        env = gym.make("GymV26Environment-v0", env=env)
-        term_fn, reward_fn = _get_term_and_reward_fn(cfg)
-    elif "gym___" in cfg.overrides.env:
-        env = gym.make(cfg.overrides.env.split("___")[1])
-        term_fn, reward_fn = _get_term_and_reward_fn(cfg)
-    else:
-        import mbrl.env.mujoco_envs
-
-        if cfg.overrides.env == "cartpole_continuous":
-            env = mbrl.env.cartpole_continuous.CartPoleEnv()
-            term_fn = mbrl.env.termination_fns.cartpole
-            reward_fn = mbrl.env.reward_fns.cartpole
-        elif cfg.overrides.env == "cartpole_pets_version":
-            env = mbrl.env.mujoco_envs.CartPoleEnv()
-            term_fn = mbrl.env.termination_fns.no_termination
-            reward_fn = mbrl.env.reward_fns.cartpole_pets
-        elif cfg.overrides.env == "pets_halfcheetah":
-            env = mbrl.env.mujoco_envs.HalfCheetahEnv()
-            term_fn = mbrl.env.termination_fns.no_termination
-            reward_fn = getattr(mbrl.env.reward_fns, "halfcheetah", None)
-        elif cfg.overrides.env == "pets_reacher":
-            env = mbrl.env.mujoco_envs.Reacher3DEnv()
-            term_fn = mbrl.env.termination_fns.no_termination
-            reward_fn = None
-        elif cfg.overrides.env == "pets_pusher":
-            env = mbrl.env.mujoco_envs.PusherEnv()
-            term_fn = mbrl.env.termination_fns.no_termination
-            reward_fn = mbrl.env.reward_fns.pusher
-        elif cfg.overrides.env == "ant_truncated_obs":
-            env = mbrl.env.mujoco_envs.AntTruncatedObsEnv()
-            term_fn = mbrl.env.termination_fns.ant
-            reward_fn = None
-        elif cfg.overrides.env == "humanoid_truncated_obs":
-            env = mbrl.env.mujoco_envs.HumanoidTruncatedObsEnv()
-            term_fn = mbrl.env.termination_fns.humanoid
-            reward_fn = None
-        elif cfg.overrides.env == "intersection-v0":
+) -> Tuple[gym.Env]:
+    
+    if cfg.overrides.env == "intersection-v0":
             env_args = omegaconf.OmegaConf.to_container(cfg.overrides.env_args)   
             render_mode = env_args['render_mode']
             env = IntersectionEnv(env_args, render_mode=render_mode)
-            term_fn = mbrl.env.termination_fns.highway_env
-            reward_fn = mbrl.env.reward_fns.highway_env 
-        else:
-            raise ValueError("Invalid environment string.")
-        env = gym.wrappers.TimeLimit(
-            env, max_episode_steps=cfg.overrides.get("trial_length", 1000)
-        )
+            term_fn = None
+            reward_fn = None
+    else:
+        raise ValueError("Invalid environment string.")
+    env = gym.wrappers.TimeLimit(
+                env, max_episode_steps=cfg.overrides.get("trial_length", 1000)
+                )
 
     env, reward_fn = _handle_learned_rewards_and_seed(cfg, env, reward_fn)
     return env, term_fn, reward_fn
+
+def make_env(
+        cfg: Union[Dict, omegaconf.ListConfig, omegaconf.DictConfig],
+    ) -> Tuple[gym.Env]:
+        """Creates an environment from a given OmegaConf configuration object.
+
+        This method expects the configuration, ``cfg``,
+        to have the following attributes (some are optional):
+
+            - If ``cfg.overrides.env_cfg`` is present, this method
+            instantiates the environment using `hydra.utils.instantiate(env_cfg)`.
+            Otherwise, it expects attribute ``cfg.overrides.env``, which should be a
+            string description of the environment where valid options are:
+
+            - "dmcontrol___<domain>--<task>": a Deep-Mind Control suite environment
+                with the indicated domain and task (e.g., "dmcontrol___cheetah--run".
+            - "gym___<env_name>": a Gym environment (e.g., "gym___HalfCheetah-v2").
+            - "cartpole_continuous": a continuous version of gym's Cartpole environment.
+            - "pets_halfcheetah": the implementation of HalfCheetah used in Chua et al.,
+                PETS paper.
+            - "ant_truncated_obs": the implementation of Ant environment used in Janner et al.,
+                MBPO paper.
+            - "humanoid_truncated_obs": the implementation of Humanoid environment used in
+                Janner et al., MBPO paper.
+
+            - ``cfg.overrides.term_fn``: (only for dmcontrol and gym environments) a string
+            indicating the environment's termination function to use when simulating the
+            environment with the model. It should correspond to the name of a function in
+            :mod:`mbrl.env.termination_fns`.
+            - ``cfg.overrides.reward_fn``: (only for dmcontrol and gym environments)
+            a string indicating the environment's reward function to use when simulating the
+            environment with the model. If not present, it will try to use
+            ``cfg.overrides.term_fn``.
+            If that's not present either, it will return a ``None`` reward function.
+            If provided, it should correspond to the name of a function in
+            :mod:`mbrl.env.reward_fns`.
+            - ``cfg.overrides.learned_rewards``: (optional) if present indicates that
+            the reward function will be learned, in which case the method will return
+            a ``None`` reward function.
+            - ``cfg.overrides.trial_length``: (optional) if presents indicates the maximum length
+            of trials. Defaults to 1000.
+
+        Args:
+            cfg (omegaconf.DictConf): the configuration to use.
+
+        Returns:
+            (tuple of env, termination function, reward function): returns the new environment,
+            the termination function to use, and the reward function to use (or ``None`` if
+            ``cfg.learned_rewards == True``).
+        """
+        # Handle the case where cfg is a dict
+        cfg = omegaconf.OmegaConf.create(cfg)
+        env_cfg = cfg.overrides.get("env_cfg", None)
+        if env_cfg is None:
+            return _legacy_make_env(cfg)
+        raise Exception('Ensure there is no "env_cfg" key in the config dictionary')
+
+def _handle_learned_rewards_and_seed(
+    cfg: Union[omegaconf.ListConfig, omegaconf.DictConfig],
+    env: gym.Env,
+    reward_fn,
+) -> Tuple[gym.Env]:
+    if cfg.overrides.get("learned_rewards", True):
+        reward_fn = None
+
+    if cfg.seed is not None:
+        env.reset(seed=cfg.seed)
+        env.observation_space.seed(cfg.seed + 1)
+        env.action_space.seed(cfg.seed + 2)
+
+    return env, reward_fn
 
 class Freeze(ABC):
     """Abstract base class for freezing various gym backends"""
@@ -117,7 +141,7 @@ class EnvHandler(ABC):
     @staticmethod
     def make_env(
         cfg: Union[Dict, omegaconf.ListConfig, omegaconf.DictConfig],
-    ) -> Tuple[gym.Env, mbrl.types.TermFnType, Optional[mbrl.types.RewardFnType]]:
+    ) -> Tuple[gym.Env]:
         """Creates an environment from a given OmegaConf configuration object.
 
         This method expects the configuration, ``cfg``,
@@ -170,13 +194,7 @@ class EnvHandler(ABC):
         if env_cfg is None:
             return _legacy_make_env(cfg)
 
-        env = hydra.utils.instantiate(env_cfg)
-        env = gym.wrappers.TimeLimit(
-            env, max_episode_steps=cfg.overrides.get("trial_length", 1000)
-        )
-        term_fn, reward_fn = _get_term_and_reward_fn(cfg)
-        env, reward_fn = _handle_learned_rewards_and_seed(cfg, env, reward_fn)
-        return env, term_fn, reward_fn
+        raise Exception('Ensure "env_cfg" key is not in the cfg dictionary')
 
     @staticmethod
     @abstractmethod
@@ -223,7 +241,7 @@ class EnvHandler(ABC):
         env: gym.wrappers.TimeLimit,
         initial_obs: np.ndarray,
         lookahead: int,
-        agent: Optional[mbrl.planning.Agent] = None,
+        agent = None,
         plan: Optional[np.ndarray] = None,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Runs the environment for some number of steps then returns it to its original state.

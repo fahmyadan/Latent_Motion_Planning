@@ -9,7 +9,7 @@ import torch
 from torch import nn as nn
 
 from .model import *
-import mbrl.util.math
+import utils.math as math
 
 
 def truncated_normal_init(m: nn.Module):
@@ -18,13 +18,13 @@ def truncated_normal_init(m: nn.Module):
     if isinstance(m, nn.Linear):
         input_dim = m.weight.data.shape[0]
         stddev = 1 / (2 * np.sqrt(input_dim))
-        mbrl.util.math.truncated_normal_(m.weight.data, std=stddev)
+        math.truncated_normal_(m.weight.data, std=stddev)
         m.bias.data.fill_(0.0)
     if isinstance(m, EnsembleLinearLayer):
         num_members, input_dim, _ = m.weight.data.shape
         stddev = 1 / (2 * np.sqrt(input_dim))
         for i in range(num_members):
-            mbrl.util.math.truncated_normal_(m.weight.data[i], std=stddev)
+            math.truncated_normal_(m.weight.data[i], std=stddev)
         m.bias.data.fill_(0.0)
 
 
@@ -77,7 +77,7 @@ class EnsembleLinearLayer(nn.Module):
         self.use_only_elite = not self.use_only_elite
 
 
-def to_tensor(x: mbrl.types.TensorType):
+def to_tensor(x):
     if isinstance(x, torch.Tensor):
         return x
     if isinstance(x, np.ndarray):

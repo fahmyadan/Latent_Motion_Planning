@@ -2,9 +2,9 @@
 
 eval "$(conda shell.bash hook)"
 
-conda create -n mbrl python=3.10 -y
+conda create -n z_plan python=3.10 -y
 
-conda activate mbrl 
+conda activate z_plan 
 
 pip install poetry
 

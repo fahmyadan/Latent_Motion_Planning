@@ -11,8 +11,7 @@ import hydra
 import numpy as np
 import omegaconf
 
-import mbrl.models
-import mbrl.types
+import latent_motion_planning.src.models
 from pytorch_mppi import MPPI
 import torch 
 from highway_env.road.lane import StraightLane, CircularLane
@@ -188,7 +187,7 @@ class MPPIAgent(Agent):
 
 
 def complete_agent_cfg(
-    env: Union[gym.Env, mbrl.models.ModelEnv], agent_cfg: omegaconf.DictConfig
+    env: Union[gym.Env], agent_cfg: omegaconf.DictConfig
 ):
     """Completes an agent's configuration given information from the environment.
 

@@ -23,6 +23,9 @@ chardet = "*"
 importlib-resources = "*"
 wandb = "*"
 moviepy = "*"
+hydra-core = "1.0.3"
+omegaconf = "2.0.2"
+
 
 
 [build-system]

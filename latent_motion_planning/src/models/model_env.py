@@ -4,7 +4,6 @@ import gymnasium as gym
 import numpy as np
 import torch
 
-import mbrl.types
 import latent_motion_planning.src.models.model_types
 from latent_motion_planning.envs.HighwayEnv.highway_env.envs.intersection_env import IntersectionEnv
 
@@ -36,10 +35,10 @@ class ModelEnv:
         self,
         env: gym.Env,
         model: Model,
-        termination_fn: mbrl.types.TermFnType,
-        reward_fn: Optional[mbrl.types.RewardFnType] = None,
+        termination_fn,
+        reward_fn = None,
         generator: Optional[torch.Generator] = None,
-        obs_process_fn: Optional[mbrl.types.ObsProcessFnType] = None,
+        obs_process_fn = None,
     ):
         self.dynamics_model = model
         self.termination_fn = termination_fn
@@ -76,8 +75,6 @@ class ModelEnv:
         Returns:
             (dict(str, tensor)): the model state returned by `self.dynamics_model.reset()`.
         """
-        if isinstance(self.dynamics_model, mbrl.models.OneDTransitionRewardModel):
-            assert len(initial_obs_batch.shape) == 2  # batch, obs_dim
         with torch.no_grad():
             model_state = self.dynamics_model.reset(
                 initial_obs_batch.astype(np.float32), rng=self._rng
@@ -87,10 +84,10 @@ class ModelEnv:
 
     def step(
         self,
-        actions: mbrl.types.TensorType,
+        actions,
         model_state: Dict[str, torch.Tensor],
         sample: bool = False,
-    ) -> Tuple[mbrl.types.TensorType, mbrl.types.TensorType, np.ndarray, Dict]:
+    ) -> Tuple[np.ndarray, Dict]:
         """Steps the model environment with the given batch of actions.
 
         Args:

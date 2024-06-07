@@ -6,9 +6,9 @@ import hydra
 import numpy as np
 import omegaconf
 
-import mbrl.models
-import mbrl.planning
-import mbrl.types
+import latent_motion_planning.src.models
+import latent_motion_planning.src.planners
+
 
 from .replay_buffer import (
     BootstrapIterator,
@@ -266,7 +266,7 @@ def get_sequence_buffer_iterator(
 def rollout_agent_trajectories(
     env: gym.Env,
     steps_or_trials_to_collect: int,
-    agent: mbrl.planning.Agent,
+    agent: latent_motion_planning.src.planners.Agent,
     agent_kwargs: Dict,
     trial_length: Optional[int] = None,
     callback: Optional[Callable] = None,
@@ -379,7 +379,7 @@ def rollout_agent_trajectories(
 def step_env_and_add_to_buffer(
     env: gym.Env,
     obs: np.ndarray,
-    agent: mbrl.planning.Agent,
+    agent: latent_motion_planning.src.planners.Agent,
     agent_kwargs: Dict,
     replay_buffer: ReplayBuffer,
     callback: Optional[Callable] = None,

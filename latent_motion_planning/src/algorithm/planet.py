@@ -13,7 +13,6 @@ import omegaconf
 import torch
 from tqdm import tqdm
 
-import mbrl.constants
 from latent_motion_planning.src.utils.env_fns import no_termination
 from latent_motion_planning.src.models import ModelEnv, ModelTrainer
 from latent_motion_planning.src.planners import RandomAgent, create_trajectory_optim_agent_for_model, MPPIAgent
@@ -53,20 +52,20 @@ def train(
     work_dir = pathlib.Path(work_dir)
     print(f"Results will be saved at {work_dir}.")
 
-    if silent:
-        logger = None
-    else:
-        logger = Logger(work_dir)
-        logger.register_group("metrics", METRICS_LOG_FORMAT, color="yellow")
-        logger.register_group(
-            mbrl.constants.RESULTS_LOG_NAME,
-            [
-                ("env_step", "S", "int"),
-                ("train_episode_reward", "RT", "float"),
-                ("episode_reward", "ET", "float"),
-            ],
-            color="green",
-        )
+    # if silent:
+    #     logger = None
+    # else:
+    #     logger = Logger(work_dir)
+    #     logger.register_group("metrics", METRICS_LOG_FORMAT, color="yellow")
+    #     logger.register_group(
+    #         mbrl.constants.RESULTS_LOG_NAME,
+    #         [
+    #             ("env_step", "S", "int"),
+    #             ("train_episode_reward", "RT", "float"),
+    #             ("episode_reward", "ET", "float"),
+    #         ],
+    #         color="green",
+    #     )
 
     rng = torch.Generator(device=cfg.device)
     rng.manual_seed(cfg.seed)

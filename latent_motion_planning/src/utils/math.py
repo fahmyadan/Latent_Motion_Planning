@@ -63,6 +63,12 @@ def gaussian_nll(
         return losses.sum(dim=1).mean()
     return losses
 
+def to_tensor(x):
+    if isinstance(x, torch.Tensor):
+        return x
+    if isinstance(x, np.ndarray):
+        return torch.from_numpy(x)
+    raise ValueError("Input must be torch.Tensor or np.ndarray.")
 
 # inplace truncated normal function for pytorch.
 # credit to https://github.com/Xingyu-Lin/mbpo_pytorch/blob/main/model.py#L64
@@ -111,7 +117,7 @@ class Normalizer:
         self.eps = 1e-12 if dtype == torch.double else 1e-5
         self.device = device
 
-    def update_stats(self, data: mbrl.types.TensorType):
+    def update_stats(self, data):
         """Updates the stored statistics using the given data.
 
         Equivalent to `self.stats.mean = data.mean(0) and self.stats.std = data.std(0)`.
@@ -126,7 +132,7 @@ class Normalizer:
         self.std = data.std(0, keepdim=True)
         self.std[self.std < self.eps] = 1.0
 
-    def normalize(self, val: Union[float, mbrl.types.TensorType]) -> torch.Tensor:
+    def normalize(self, val: Union[float]) -> torch.Tensor:
         """Normalizes the value according to the stored statistics.
 
         Equivalent to (val - mu) / sigma, where mu and sigma are the stored mean and
@@ -142,7 +148,7 @@ class Normalizer:
             val = torch.from_numpy(val).to(self.device)
         return (val - self.mean) / self.std
 
-    def denormalize(self, val: Union[float, mbrl.types.TensorType]) -> torch.Tensor:
+    def denormalize(self, val: Union[float]) -> torch.Tensor:
         """De-normalizes the value according to the stored statistics.
 
         Equivalent to sigma * val + mu, where mu and sigma are the stored mean and

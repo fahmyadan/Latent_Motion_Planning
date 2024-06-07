@@ -5,14 +5,14 @@ import numpy as np
 import omegaconf
 import torch
 import latent_motion_planning.src.algorithm.planet as planet
-import mbrl.util.env
 import wandb
 
 from latent_motion_planning.src.utils.callbacks import WandbCallback
+from latent_motion_planning.src.utils.env import make_env
 
 @hydra.main(config_path="cfgs", config_name="main")
 def run(cfg: omegaconf.DictConfig):
-    env, term_fn, reward_fn = mbrl.util.env.EnvHandler.make_env(cfg)
+    env, term_fn, reward_fn = make_env(cfg)
     np.random.seed(cfg.seed)
     torch.manual_seed(cfg.seed)
     if cfg.overrides.get('logging', None) and cfg.overrides.logging.get('wandb', None):

@@ -12,8 +12,8 @@ import torch
 import tqdm
 from torch import optim as optim
 
-from mbrl.util.logger import Logger
-from mbrl.util.replay_buffer import BootstrapIterator, TransitionIterator
+
+from latent_motion_planning.src.utils.replay_buffer import BootstrapIterator, TransitionIterator
 
 from .model import Model
 
@@ -47,7 +47,7 @@ class ModelTrainer:
         optim_lr: float = 1e-4,
         weight_decay: float = 1e-5,
         optim_eps: float = 1e-8,
-        logger: Optional[Logger] = None,
+        logger = None,
     ):
         self.model = model
         self._train_iteration = 0

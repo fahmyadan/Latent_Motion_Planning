@@ -5,8 +5,8 @@ from typing import Any, Dict, Optional, Sequence, Tuple, Union
 import torch
 from torch import nn as nn
 
-from mbrl.models.util import to_tensor
-from mbrl.types import ModelInput, TransitionBatch
+from latent_motion_planning.src.utils.math import to_tensor
+from latent_motion_planning.src.models.model_types import ModelInput, TransitionBatch
 
 
 # ---------------------------------------------------------------------------
