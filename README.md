@@ -26,5 +26,6 @@ We have included a simple installation script:
 sudo chmod +x setup.bash 
 ./setup.bash
 conda activate mbrl
+python3 latent_motion_planning/main.py algorithm=planet overrides=planet_highway_env dynamics_model=planet_hw action_optimizer=mppi
 ```
 
