@@ -1,0 +1,3 @@
+[submodule "HighwayEnv"]
+	path = HighwayEnv
+	url = https://github.com/fahmyadan/HighwayEnv.git
