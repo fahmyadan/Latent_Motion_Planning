@@ -1,0 +1,32 @@
+# @package _group_
+_target_: latent_motion_planning.src.models.PlaNetEnsemble
+ensemble_size: 2
+device: ${device}
+propagation_method: fixed_model
+action_size: 2
+member_cfg:
+  _target_: latent_motion_planning.src.models.PlaNetModel
+  obs_shape: [4, 128, 128]
+  obs_encoding_size: 9216 #256 * 6 * 6 
+  vec_input: 5
+  encoder_config:
+    - [3, 32, 4, 2]
+    - [32, 64, 4, 2]
+    - [64, 128, 4, 2]
+    - [128, 256, 4, 2]
+  decoder_config:
+    - [1024, 1, 1]
+    - - [1024, 128, 5, 2]
+      - [128, 64, 5, 2]
+      - [64, 32, 5, 2]
+      - [32, 16, 6, 2]
+      - [16,3, 6, 2]
+  action_size: 2
+  hidden_size_fcs: 200
+  belief_size: 200
+  latent_state_size: 30
+  device: ${device}
+  min_std: 0.1
+  free_nats: 3.0
+  kl_scale: 1.0
+  grad_clip_norm: 1000.0

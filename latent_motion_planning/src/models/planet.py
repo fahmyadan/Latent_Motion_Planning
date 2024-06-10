@@ -280,6 +280,8 @@ class PlaNetModel(Model):
         self._current_posterior_sample: torch.Tensor = None
         self._current_action: torch.Tensor = None
 
+        self.gaussian_posterior_params = []
+
     def _process_pixel_obs(self, obs: torch.Tensor) -> torch.Tensor:
         return to_tensor(obs).float().to(self.device) / 256.0 - 0.5
 
@@ -435,6 +437,7 @@ class PlaNetModel(Model):
                     current_belief,
                 )
                 #posterior dist represents q distribution (variational)
+                self.gaussian_posterior_params.append(posterior_dist_params)
 
                 img_pred_next_obs[:,t_step], kin_pred_next_obs[:,t_step] = self._forward_vec_decoder(posterior_sample, next_belief)
                 #decoder captures the observation model p(o|...)

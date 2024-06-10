@@ -4,6 +4,6 @@ from .model_trainer import ModelTrainer
 from .basic_ensemble import BasicEnsemble
 from .model_types import *
 from .planet import *
-
+from .planet_ensemble import *
 
 

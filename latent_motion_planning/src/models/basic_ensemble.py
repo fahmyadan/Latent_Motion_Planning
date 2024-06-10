@@ -69,7 +69,7 @@ class BasicEnsemble(Ensemble):
         for i in range(ensemble_size):
             model = hydra.utils.instantiate(member_cfg)
             self.members.append(model)
-        self.deterministic = self.members[0].deterministic
+        self.deterministic = getattr(self.members[0], "deterministic", False) #self.members[0].deterministic
         self.in_size = getattr(self.members[0], "in_size", None)
         self.out_size = getattr(self.members[0], "out_size", None)
         self.members = nn.ModuleList(self.members)

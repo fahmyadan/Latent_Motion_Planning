@@ -14,7 +14,7 @@ import torch
 from tqdm import tqdm
 
 from latent_motion_planning.src.utils.env_fns import no_termination
-from latent_motion_planning.src.models import ModelEnv, ModelTrainer, Model, PlaNetModel
+from latent_motion_planning.src.models import ModelEnv, ModelTrainer, Model, PlaNetModel, PlaNetEnsemble
 from latent_motion_planning.src.planners import RandomAgent, create_trajectory_optim_agent_for_model, MPPIAgent
 # from mbrl.util import Logger
 from latent_motion_planning.src.utils.common import (
@@ -109,7 +109,7 @@ def train(
     # Create PlaNet model
     cfg.dynamics_model.action_size = env.action_space.shape[0]
     planet = hydra.utils.instantiate(cfg.dynamics_model)
-    assert isinstance(planet, PlaNetModel), f"expected dynamics model of type {PlaNetModel}"
+    assert isinstance(planet, PlaNetModel) or isinstance(planet, PlaNetEnsemble), f"expected dynamics model of type {PlaNetModel} or {PlaNetEnsemble}"
     model_env = ModelEnv(env, planet, no_termination, generator=rng)
     trainer = ModelTrainer(planet, cfg.overrides, logger=None, optim_lr=1e-3, optim_eps=1e-4)
 
