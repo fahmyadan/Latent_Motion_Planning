@@ -100,48 +100,89 @@ class PlaNetEnsemble(BasicEnsemble):
         #TODO: Reset the ensemble properly. Which model state do we use, this needs to be a function of uncertainty of each member in the ensemble. 
 
         all_states = {}
+        all_dist_params = []
         for idx, model in enumerate(self.members):
 
             state_dict = model.reset(obs, rng)
             all_states[idx] = state_dict
+            all_dist_params.append(model._current_posterior_params)
 
         #TODO: Fix return variable. just using a dummy model state for now. We need it to return the latent / belief state of the most certain model. 
                 # Use the list of updated gaussian paras (len == num_grad_updates). Use the last update data to determine which model has lowest uncertainty and return that model and state. 
                 # return the corresponding model state and model index
-        best_idx, _ = self.output_gate()
-        self.best_model_idx = best_idx
+        params = self.output_gate(all_dist_params)
+        params = torch.concatenate(params, dim=-1)
 
-        return all_states[best_idx]
+        new_state = self.members[0]._sample_state_from_params(params, self.members[0].rng)
 
-    def output_gate(self):
+        all_beliefs = []
+        for idx, model_state in all_states.items():
+            belief = model_state['belief']
+            all_beliefs.append(belief)
+        if new_state.shape == all_states[0]['latent'].shape:
+            latent_state = new_state
+        else:
+            latent_state = new_state.repeat(obs.shape[0], 1)
+        belief_mean = torch.stack(all_beliefs).mean(dim=0)
+
+        assert latent_state.shape == all_states[0]['latent'].shape, f'Shape issue with latent {latent_state.shape}'
+
+        return {
+            "latent": latent_state,
+            "belief": belief_mean,
+        }
+
+    def output_gate(self, all_params):
 
         #TODO: Implement a gating mechanism that selects the model with lowest uncertainty for inference 
-        latest_params = self.ensemble_gaussian_params[-1]
+        # latest_params = self.ensemble_gaussian_params[-1]
+        latest_params = all_params
         latent_size = self.members[0].latent_state_size
         best_var = None 
         best_idx = None 
+        all_means, all_vars = [], []
+    
+        with torch.no_grad():
+            for params in latest_params:
+                mean = params[:,  : latent_size]
+                var = params[:, latent_size :]
+                all_means.append(mean)
+                all_vars.append(var)
 
-        for model_idx, params in latest_params.items():
-            mean = params[:, :,  : latent_size]
-            var = params[:, :, latent_size :]
+        means = torch.stack(all_means) #ensemble_size, batch, mean_dim
+        logvars = torch.stack(all_vars) #ensemble_size, batch, var_dim
+        # assert best_idx is not None, "No best model found. Check the ensemble_gaussian_params."
 
-            total_var = torch.sum(var, dim = 1)
-            #Take the average total_time var across the entire batch
-            mean_batch_var = torch.mean(total_var, dim = 0) # size = latent_size
-
-            assert torch.any(mean_batch_var >= 0 ), "Cannot have a negative variance"
-
-            if best_var is None or torch.sum(mean_batch_var) < torch.sum(best_var):
-                best_var = mean_batch_var 
-                best_idx = model_idx  
-
-        assert best_idx is not None, "No best model found. Check the ensemble_gaussian_params."
-
-        return best_idx, best_var  
+        return means.mean(dim=0), logvars.mean(dim=0) 
 
     def sample(self, act, model_state: Tuple[int, Any], deterministic, rng):
 
-        return self.members[self.best_model_idx].sample(act, model_state, deterministic, rng)
+        outs = []
+        new_params = []
+        for model in self.members:
+            outs.append(model.sample(act, model_state, deterministic, rng))
+            new_params.append(model._current_posterior_params)
+        
+        params = self.output_gate(new_params)
+        params = torch.concatenate(params, dim=-1)
+        #TODO: Get average belief of ensemble
+        rewards =[]
+        belief = []
+        for ensemble in outs:
+            new_latent, reward, _, model_state = ensemble
+            rewards.append(reward)
+            belief.append(model_state['belief'])
+
+        avg_ensemble_reward = torch.stack(rewards).mean(dim=0)
+        avg_ensemble_belief = torch.stack(belief).mean(dim=0)
+         
+        new_state = self.members[0]._sample_state_from_params(params, self.members[0].rng)
+
+
+        out = (new_state, avg_ensemble_reward, None, {'latent': new_state, 'belief': avg_ensemble_belief})
+
+
+        return out
     
     def process_batch_params(self):
         # At the end of each batch, stack the parameters to be (batch, time_horizon, latent_size *2)

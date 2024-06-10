@@ -281,6 +281,7 @@ class PlaNetModel(Model):
         self._current_action: torch.Tensor = None
 
         self.gaussian_posterior_params = []
+        self._current_posterior_params = None
 
     def _process_pixel_obs(self, obs: torch.Tensor) -> torch.Tensor:
         return to_tensor(obs).float().to(self.device) / 256.0 - 0.5
@@ -659,6 +660,7 @@ class PlaNetModel(Model):
                 model_state["latent"], action, model_state["belief"]
             )
             state_dist_params = self.prior_transition_model(next_belief)
+            self._current_posterior_params = state_dist_params
             next_latent = self._sample_state_from_params(
                 state_dist_params,
                 self.rng if rng is None else rng,
@@ -722,12 +724,15 @@ class PlaNetModel(Model):
                 belief = self._current_belief
             action = to_tensor(action).to(self.device)
             (
-                *_,
+                prior_dist_params,
+                prior_sample,
+                posterior_dist_params,
                 self._current_posterior_sample,  # posterior_sample
                 self._current_belief,  # next_belief
             ) = self._forward_transition_models(
                 [img_obs, kin_obs], action, latent, belief, only_posterior=True, rng=rng
             )
+            self._current_posterior_params = posterior_dist_params
             return {
                 "latent": self._current_posterior_sample,
                 "belief": self._current_belief,
