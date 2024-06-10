@@ -22,7 +22,7 @@ It will still run without CUDA but a large ensemble size will have larger memory
 
 We have included a simple installation script:
 
-```
+```bash
 git clone --recurse-submodules https://github.com/fahmyadan/Latent_Motion_Planning.git 
 sudo chmod +x setup.bash 
 ./setup.bash
@@ -32,7 +32,7 @@ python3 latent_motion_planning/main.py algorithm=planet overrides=planet_highway
 
 To run the ensemble networks: 
 
-```
+```bash
 conda activate z_plan
 python3 latent_motion_planning/main.py algorithm=planet overrides=planet_highway_env dynamics_model=planet_ensemble action_optimizer=mppi
 
