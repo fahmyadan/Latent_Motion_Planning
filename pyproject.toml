@@ -25,6 +25,7 @@ wandb = "*"
 moviepy = "*"
 hydra-core = "1.0.3"
 omegaconf = "2.0.2"
+tensorboard = "^2.17.0"
 
 
 

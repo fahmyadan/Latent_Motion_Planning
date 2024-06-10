@@ -2,7 +2,7 @@
 env: "intersection-v0"
 evaluate_trained: false
 logging:
-  wandb: false
+  wandb: true #To log rewards and performance. See render mode for img and videos
   project_name: 'Planet'
   tensorboard_log: 'logs'
   model_path: '/home/tsl/Desktop/models/planet/run-20240501_141635-fs2sufpj (short_horizon)/model.pth'
@@ -26,7 +26,7 @@ env_args:
   simulation_frequency: 10
   policy_frequency: 5
   exit_distance: 70
-  render_mode: human #or rgb_array for wandb logging 
+  render_mode: rgb_array # rgb_array for wandb logging or human for no logging.
   observation:
     type: TupleObservation
     observation_configs:
@@ -77,7 +77,7 @@ mppi_gamma: 0.9
 mppi_sigma: 1.0
 mppi_beta: 0.9
 
-#For demos
+#For demos (with access to ground truth model)
 mppi:
   nx : 4
   noise_sigma: [[5, 0],[0,1.5]]
