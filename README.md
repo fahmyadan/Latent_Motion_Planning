@@ -4,9 +4,9 @@ This repository is a library for Model Based Reinoforcement Learning (MBRL) buil
 
 It is concerned with Autonomous Driving environments, where the goal is to learn the transition dynamics of the environment in closed loop: 
 
-$
+$$
 P_{\theta}(x_{t+1}| x_t, u_t) \sim N(\mu, \sigma^2)
-$
+$$
 
 In model based planning cases where we cannot access the ground truth dynamics, this approximation can be used for multi-step planning. Examples include RL (Policy Optimization, Q-Learning etc.) or sampling based planning (e.g. MPPI, CEM etc.).
 
