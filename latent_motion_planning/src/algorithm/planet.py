@@ -246,8 +246,8 @@ def train(
         if cfg.overrides.get("save_replay_buffer", False):
             replay_buffer.save(work_dir)
         metrics = get_metrics_and_clear_metric_containers()
-        if logger: 
-            logger.log_data("metrics", metrics)
+        # if logger: 
+        #     logger.log_data("metrics", metrics)
 
         # Collect one episode of data
         episode_reward = 0.0
