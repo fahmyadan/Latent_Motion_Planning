@@ -1,5 +1,5 @@
 # @package _group_
-_target_: mbrl.models.PlaNetModel
+_target_: latent_motion_planning.src.models.PlaNetModel
 obs_shape: [3, 128, 128]
 obs_encoding_size: 9216 #256 * 6 * 6 
 vec_input: 5

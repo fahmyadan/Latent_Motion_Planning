@@ -9,7 +9,8 @@ import torch
 from torch import nn as nn
 
 from .model import *
-import utils.math as math
+# import utils.math as math
+import latent_motion_planning.src.utils.math as math
 
 
 def truncated_normal_init(m: nn.Module):

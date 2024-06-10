@@ -1,6 +1,6 @@
 # @package _group_
 
-_target_: mbrl.planning.MPPIOptimizer
+_target_: latent_motion_planning.src.planners.MPPIOptimizer
 num_iterations: ${overrides.mppi_num_iters}
 gamma: ${overrides.mppi_gamma}
 population_size: ${overrides.mppi_population_size}

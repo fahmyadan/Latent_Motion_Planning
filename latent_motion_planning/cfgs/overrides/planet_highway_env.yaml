@@ -12,7 +12,7 @@ n_epochs: 1
 
 
 env_args:
-  _target_: mbrl.planning.TrajectoryOptimizerAgent
+  _target_: latent_motion_planning.src.planners.TrajectoryOptimizerAgent
   offroad_terminal: true
   duration: 20
   destination: 'o1'

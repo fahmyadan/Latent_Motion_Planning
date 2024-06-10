@@ -2,7 +2,7 @@
 name: "planet"
 
 agent:
-  _target_: mbrl.planning.TrajectoryOptimizerAgent
+  _target_: latent_motion_planning.src.planners.TrajectoryOptimizerAgent
   action_lb: [-40, -1.0] #???
   action_ub: [40, 1.0] # ???
   planning_horizon: ${overrides.planning_horizon}
