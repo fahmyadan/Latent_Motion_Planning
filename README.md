@@ -26,7 +26,7 @@ We have included a simple installation script:
 git clone --recurse-submodules https://github.com/fahmyadan/Latent_Motion_Planning.git 
 sudo chmod +x setup.bash 
 ./setup.bash
-conda activate mbrl
+conda activate z_plan
 python3 latent_motion_planning/main.py algorithm=planet overrides=planet_highway_env dynamics_model=planet_hw action_optimizer=mppi
 ```
 
