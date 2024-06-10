@@ -30,3 +30,11 @@ conda activate z_plan
 python3 latent_motion_planning/main.py algorithm=planet overrides=planet_highway_env dynamics_model=planet_hw action_optimizer=mppi
 ```
 
+To run the ensemble networks: 
+
+```
+conda activate z_plan
+python3 latent_motion_planning/main.py algorithm=planet overrides=planet_highway_env dynamics_model=planet_ensemble action_optimizer=mppi
+
+```
+
