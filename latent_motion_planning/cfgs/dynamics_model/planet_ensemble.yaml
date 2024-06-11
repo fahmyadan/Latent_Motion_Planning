@@ -2,7 +2,7 @@
 _target_: latent_motion_planning.src.models.PlaNetEnsemble
 ensemble_size: 2
 device: ${device}
-propagation_method: fixed_model
+propagation_method: expectation
 action_size: 2
 member_cfg:
   _target_: latent_motion_planning.src.models.PlaNetModel

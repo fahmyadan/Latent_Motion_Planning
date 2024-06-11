@@ -33,6 +33,7 @@ class PlaNetEnsemble(BasicEnsemble):
 
         self.ensemble_gaussian_params = []
         self.best_model_idx = None 
+        self.propagation_method = propagation_method
     
     def update(
         self,
@@ -40,7 +41,6 @@ class PlaNetEnsemble(BasicEnsemble):
         optimizer: torch.optim.Optimizer,
         target: Optional[torch.Tensor] = None,
     ):
-    #TODO: Change update function to update the weights of each member according to their inidividual loss (NLL Loss)
     
 
         self.train()
@@ -151,9 +151,21 @@ class PlaNetEnsemble(BasicEnsemble):
 
         means = torch.stack(all_means) #ensemble_size, batch, mean_dim
         logvars = torch.stack(all_vars) #ensemble_size, batch, var_dim
-        # assert best_idx is not None, "No best model found. Check the ensemble_gaussian_params."
 
-        return means.mean(dim=0), logvars.mean(dim=0) 
+        # assert best_idx is not None, "No best model found. Check the ensemble_gaussian_params.
+
+        if self.propagation_method == 'expectation':
+            return  means.mean(dim=0), logvars.mean(dim=0)
+
+        mu =  means.mean(dim=0)
+        d_mu = means- mu
+        var = torch.pow(d_mu, 2)
+
+        total_var = torch.sum(var, dim=0)
+
+        avg_ensemble_var = total_var / max(0,(len(self.members) -1))
+
+        return mu, avg_ensemble_var #logvars.mean(dim=0) 
 
     def sample(self, act, model_state: Tuple[int, Any], deterministic, rng):
 
