@@ -342,6 +342,7 @@ def rollout_agent_trajectories(
                     replay_buffer,
                     callback=callback,
                     agent_uses_low_dim_obs=agent_uses_low_dim_obs,
+                    trial=trial
                 )
             else:
                 if agent_uses_low_dim_obs:
@@ -384,6 +385,7 @@ def step_env_and_add_to_buffer(
     replay_buffer: ReplayBuffer,
     callback: Optional[Callable] = None,
     agent_uses_low_dim_obs: bool = False,
+    trial: int = 0
 ) -> Tuple[np.ndarray, float, bool, bool, Dict]:
     """Steps the environment with an agent's action and populates the replay buffer.
 
@@ -418,6 +420,10 @@ def step_env_and_add_to_buffer(
     else:
         agent_obs = obs
     action = agent.act(agent_obs, **agent_kwargs)
+    if trial % 10 ==0:
+        acc = action[0]
+        straight = 0.0
+        action = np.array([acc,straight])
     next_obs, reward, terminated, truncated, info = env.step(action)
     replay_buffer.add(obs, action, next_obs, reward, terminated, truncated)
     if callback:
@@ -436,6 +442,7 @@ class MonitorKPIs():
         self.arrived = []
         self.off_road = []
         self.truncated_time = []
+        self.gone_straight = []
 
         self.env = env.unwrapped
         max_speed = self.env.controlled_vehicles[0].MAX_SPEED
@@ -448,10 +455,12 @@ class MonitorKPIs():
         collisions = self.check_collision()
         arrived = self.check_arrived()
         off_road = self.check_off_road()
+        gone_straight = self.check_gone_straight()
 
         self.arrived.append(arrived)
         self.all_collisions.append(collisions)
         self.off_road.append(off_road)
+        self.gone_straight.append(gone_straight)
 
         self.calculate_tt()
         self.calculate_delay()
@@ -534,3 +543,16 @@ class MonitorKPIs():
                 off_road.append(0)
 
         return off_road
+    
+    def check_gone_straight(self):
+
+        gone_straight_f = self.env.get_straight_reward
+        gone_straight = []
+        for veh in self.env.controlled_vehicles:
+
+            if gone_straight_f(veh):
+
+                gone_straight.append(1)
+            else:
+                gone_straight.append(0)
+        return gone_straight
