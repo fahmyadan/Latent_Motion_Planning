@@ -2,7 +2,7 @@
 env: "intersection-v0"
 evaluate_trained: false
 logging:
-  wandb: false  #To log rewards and performance. See render mode for img and videos
+  wandb: true #To log rewards and performance. See render mode for img and videos
   project_name: 'Planet'
   tensorboard_log: 'logs'
   model_path: '/home/tsl/Desktop/models/planet/run-20240501_141635-fs2sufpj (short_horizon)/model.pth'
