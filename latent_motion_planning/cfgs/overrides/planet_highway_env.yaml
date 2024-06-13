@@ -2,7 +2,7 @@
 env: "intersection-v0"
 evaluate_trained: false
 logging:
-  wandb: true #To log rewards and performance. See render mode for img and videos
+  wandb: false #To log rewards and performance. See render mode for img and videos
   project_name: 'Planet'
   tensorboard_log: 'logs'
   model_path: '/home/tsl/Desktop/models/planet/run-20240501_141635-fs2sufpj (short_horizon)/model.pth'
@@ -18,12 +18,12 @@ env_args:
   destination: 'o1'
   initial_vehicle_count: 5
   spawn_probability: 0.5
-  collision_reward: -10
-  on_road_reward: 0.05
+  collision_reward: -20
+  on_road_reward: 0.1
   high_speed_reward: 0.1
   path_reward: 0
   arrived_reward: 20
-  goal_reward: 1
+  goal_reward: 5
   reward_speed_range: [3, 10]
   simulation_frequency: 10
   policy_frequency: 5
