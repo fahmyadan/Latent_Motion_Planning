@@ -423,9 +423,11 @@ def step_env_and_add_to_buffer(
     if trial % 10 ==0:
         acc = action[0]
         straight = 0.0
-        action = np.array([acc,straight])
+        # action = np.array([acc,straight])
     next_obs, reward, terminated, truncated, info = env.step(action)
     replay_buffer.add(obs, action, next_obs, reward, terminated, truncated)
+    # env.render()
+
     if callback:
         callback(*(obs, action, next_obs, reward, terminated, truncated))
     return next_obs, reward, terminated, truncated, info

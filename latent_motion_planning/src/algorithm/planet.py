@@ -96,8 +96,8 @@ def train(
     total_demo_rewards , metrics = rollout_agent_trajectories(
         env,
         cfg.algorithm.num_initial_trajectories,
-        MPPIAgent(env, **omegaconf.OmegaConf.to_container(cfg.overrides.mppi)), 
-        #RandomAgent(env),
+        # MPPIAgent(env, **omegaconf.OmegaConf.to_container(cfg.overrides.mppi)),
+        RandomAgent(env),
         agent_kwargs={},
         replay_buffer=replay_buffer,
         collect_full_trajectories=True,
@@ -258,7 +258,7 @@ def train(
         terminated = False
         truncated = False
         pbar = tqdm(total=1000)
-
+        action_repeat = 1
         while not terminated and not truncated:
             planet.update_posterior(obs, action=action, rng=rng)
             action_noise = (
@@ -271,10 +271,18 @@ def train(
             action = np.clip(
                 action, -1.0, 1.0, dtype=env.action_space.dtype
             )  # to account for the noise and fix dtype
-            next_obs, reward, terminated, truncated, _ = env.step(action)
-            replay_buffer.add(obs, action, next_obs, reward, terminated, truncated)
-            episode_reward += reward
-            obs = next_obs
+            # next_obs, reward, terminated, truncated, _ = env.step(action)
+            # replay_buffer.add(obs, action, next_obs, reward, terminated, truncated)
+            # episode_reward += reward
+            # obs = next_obs
+            for _ in range(action_repeat):
+                if terminated or truncated:
+                    break
+                next_obs, reward, terminated, truncated, _ = env.step(action)
+                episode_reward += reward
+                obs = next_obs
+                step += 1
+
             if debug_mode:
                 print(f"step: {step}, reward: {reward}.")
             step += 1
@@ -290,14 +298,20 @@ def train(
         #     },
         # )
         if wandb: 
-            reward_cb = wandb[1]
-            ep_reward = episode_reward * is_test_episode(episode) 
-            train_ep_reward = episode_reward * (1 - is_test_episode(episode))
-            reward_cb(None, None, None, ep_reward, train_ep_reward, episode)
+            # reward_cb = wandb[1]
+            # ep_reward = episode_reward * is_test_episode(episode)
+            # train_ep_reward = episode_reward * (1 - is_test_episode(episode))
+            # reward_cb(None, None, None, ep_reward, train_ep_reward, episode)
+            if is_test_episode(episode):
+                reward_cb = wandb[2]
+                reward_cb(None, None, None, episode_reward, None, episode)
+            else:
+                reward_cb = wandb[1]
+                reward_cb(None, None, None, None, episode_reward, episode)
             if env.render_mode == 'rgb_array' and episode_trigger(episode):
                 all_imgs = os.listdir(recons_dir)
                 video_path = f'{vid_dir}/rl-video-episode-{episode}.mp4'
-                wb.log({"Intersection": wb.Video(video_path, fps=4, format="mp4")})
+                # wb.log({"Intersection": wb.Video(video_path, fps=4, format="mp4")})
 
                 log_recon_imgs(all_imgs, episode)
 
@@ -342,6 +356,7 @@ def evaluate_trained_model(model_path, env, cfg):
     agent = create_trajectory_optim_agent_for_model(model_env, cfg.algorithm.agent)
     total_rewards = []
     pbar = tqdm(total=n_episodes)
+    action_repeat = 1
     # Collect one episode of data
     for eval_episode in range(n_episodes):
         episode_reward = 0.0
@@ -359,9 +374,17 @@ def evaluate_trained_model(model_path, env, cfg):
             action = np.clip(
                 action, -1.0, 1.0, dtype=env.action_space.dtype
             )  # to account for the noise and fix dtype
-            next_obs, reward, terminated, truncated, _ = env.step(action)
-            episode_reward += reward
-            obs = next_obs
+            # next_obs, reward, terminated, truncated, _ = env.step(action)
+            # episode_reward += reward
+            # obs = next_obs
+
+            for _ in range(action_repeat):
+                if terminated or truncated:
+                    break
+                next_obs, reward, terminated, truncated, _ = env.step(action)
+                episode_reward += reward
+                obs = next_obs
+                step += 1
             #TODO: Add some KPI logging, travel time collision etc. 
             # if debug_mode:
             #     print(f"step: {step}, reward: {reward}.")

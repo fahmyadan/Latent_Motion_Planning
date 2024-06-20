@@ -16,18 +16,19 @@ env_args:
   offroad_terminal: true
   duration: 20
   destination: 'o1'
-  initial_vehicle_count: 5
-  spawn_probability: 0.5
-  collision_reward: -10
+  initial_vehicle_count: 10
+  spawn_probability: 0.1
+  collision_reward: -5
   on_road_reward: 0.05
-  high_speed_reward: 0.1
+  high_speed_reward: 1.0
   path_reward: 0
-  arrived_reward: 20
-  goal_reward: 1
+  arrived_reward: 1
+  goal_reward: 0
   reward_speed_range: [3, 10]
   simulation_frequency: 10
   policy_frequency: 5
   exit_distance: 70
+  normalize_reward: true
   render_mode: rgb_array # rgb_array for wandb logging or human for no logging.
   observation:
     type: TupleObservation
@@ -55,7 +56,9 @@ env_args:
             vy: [-20, 20]
         
   action: 
-    type: ContinuousAction
+    type: ContinuousHybridAction
+    lateral: false
+    hybrid: true
 
 term_fn: "no_termination"
 
@@ -84,8 +87,10 @@ mppi:
   nx : 4
   noise_sigma: [[5, 0],[0,1.5]]
   noise_mu : [0, 0]
-  u_min: [-40, -1.0]
-  u_max: [40, 1.0]
+#  u_min: [-40, -1.0]
+#  u_max: [40, 1.0]
+  u_max: [1.0, 1.0]
+  u_min: [-1.0, -1.0]
   horizon: 10
   num_samples : 2000
   lambda_: 200

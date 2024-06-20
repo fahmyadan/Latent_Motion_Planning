@@ -3,8 +3,10 @@ name: "planet"
 
 agent:
   _target_: latent_motion_planning.src.planners.TrajectoryOptimizerAgent
-  action_lb: [-40, -1.5] #???
-  action_ub: [40, 1.5] # ???
+#  action_lb: [-40, -1.5] #???
+#  action_ub: [40, 1.5] # ???
+  action_lb: ???
+  action_ub: ???
   planning_horizon: ${overrides.planning_horizon}
   optimizer_cfg: ${action_optimizer}
   replan_freq: 1
@@ -13,6 +15,6 @@ agent:
 
 num_initial_trajectories: 50
 action_noise_std: 0.3
-test_frequency: 1
+test_frequency: 25
 num_episodes: 5000
 dataset_size: 100000

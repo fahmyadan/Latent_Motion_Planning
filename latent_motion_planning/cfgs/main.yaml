@@ -2,6 +2,7 @@ defaults:
   - algorithm: planet
   - dynamics_model: planet_hw
   - overrides: planet_highway_env
+#  - overrides: planet_cartpole_balance
   - action_optimizer: mppi
 
 seed: 0

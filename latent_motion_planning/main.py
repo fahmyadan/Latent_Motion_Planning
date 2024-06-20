@@ -18,7 +18,7 @@ def run(cfg: omegaconf.DictConfig):
     if cfg.overrides.get('logging', None) and cfg.overrides.logging.get('wandb', None):
         wandb_cfg = omegaconf.OmegaConf.to_container(cfg)
         wandb_run = wandb.init(project= cfg.overrides.logging.project_name, config=wandb_cfg, sync_tensorboard=True, monitor_gym=True)
-        wanb_cbs = [WandbCallback('loss', wandb_run), WandbCallback('reward', wandb_run)]
+        wanb_cbs = [WandbCallback('loss', wandb_run), WandbCallback('train_reward', wandb_run), WandbCallback('test_reward', wandb_run)]
     else :
         wanb_cbs = None
     if cfg.algorithm.name == "planet":
