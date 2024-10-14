@@ -8,3 +8,4 @@ latent_motion_planning/src/planners/__pycache__/*
 latent_motion_planning/src/algorithm/__pycache__/*
 latent_motion_planning/__pycache__/*
 .vscode/launch.json
+latent_motion_planning/exp
